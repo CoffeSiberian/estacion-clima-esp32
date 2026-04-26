@@ -6,7 +6,7 @@ from sqlalchemy import func
 from sqlmodel import Session, select
 
 from database.database import get_session
-from database.model import Sensor, Registro
+from database.model import Estacion, Sensor, Registro
 from database.schema import SensorRead, RegistroPromedioRead, ListaRespuesta
 import utils.cache as cache
 
@@ -50,20 +50,33 @@ def list_registros_public(
     stmt = (
         select(
             Registro.fk_sensor,
+            Sensor.tipo.label("sensor_tipo"),
+            Estacion.id.label("estacion_id"),
+            Estacion.nombre.label("estacion_nombre"),
             bucket,
             func.avg(Registro.temperatura).label("temperatura"),
             func.avg(Registro.humedad).label("humedad"),
         )
+        .join(Sensor, Registro.fk_sensor == Sensor.id)
+        .join(Estacion, Sensor.fk_estacion == Estacion.id)
         .where(Registro.fecha_hora >= cutoff)
-        .group_by(Registro.fk_sensor, bucket)
+        .group_by(Registro.fk_sensor, Sensor.tipo, Estacion.id, Estacion.nombre, bucket)
         .order_by(bucket.desc())
     )
     if sensor_id:
         stmt = stmt.where(Registro.fk_sensor == sensor_id)
 
-    rows = session.exec(stmt).all()
+    rows = session.execute(stmt).all()
     data = [
-        {"fk_sensor": r.fk_sensor, "fecha_hora": r.fecha_hora, "temperatura": r.temperatura, "humedad": r.humedad}
+        {
+            "fk_sensor": r.fk_sensor,
+            "sensor_tipo": r.sensor_tipo,
+            "estacion_id": r.estacion_id,
+            "estacion_nombre": r.estacion_nombre,
+            "fecha_hora": r.fecha_hora,
+            "temperatura": r.temperatura,
+            "humedad": r.humedad,
+        }
         for r in rows
     ]
     cache.set(key, data)
@@ -89,19 +102,32 @@ def get_registros_sensor_public(
         func.floor(func.unix_timestamp(Registro.fecha_hora) / 600) * 600
     ).label("fecha_hora")
 
-    rows = session.exec(
+    rows = session.execute(
         select(
             Registro.fk_sensor,
+            Sensor.tipo.label("sensor_tipo"),
+            Estacion.id.label("estacion_id"),
+            Estacion.nombre.label("estacion_nombre"),
             bucket,
             func.avg(Registro.temperatura).label("temperatura"),
             func.avg(Registro.humedad).label("humedad"),
         )
+        .join(Sensor, Registro.fk_sensor == Sensor.id)
+        .join(Estacion, Sensor.fk_estacion == Estacion.id)
         .where(Registro.fecha_hora >= cutoff, Registro.fk_sensor == sensor_id)
-        .group_by(Registro.fk_sensor, bucket)
+        .group_by(Registro.fk_sensor, Sensor.tipo, Estacion.id, Estacion.nombre, bucket)
         .order_by(bucket.desc())
     ).all()
     data = [
-        {"fk_sensor": r.fk_sensor, "fecha_hora": r.fecha_hora, "temperatura": r.temperatura, "humedad": r.humedad}
+        {
+            "fk_sensor": r.fk_sensor,
+            "sensor_tipo": r.sensor_tipo,
+            "estacion_id": r.estacion_id,
+            "estacion_nombre": r.estacion_nombre,
+            "fecha_hora": r.fecha_hora,
+            "temperatura": r.temperatura,
+            "humedad": r.humedad,
+        }
         for r in rows
     ]
     cache.set(key, data)

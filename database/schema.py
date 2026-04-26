@@ -60,6 +60,9 @@ class RegistroPost(BaseModel):
 class RegistroPromedioRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     fk_sensor: str
+    sensor_tipo: str
+    estacion_id: str
+    estacion_nombre: str
     fecha_hora: datetime
     temperatura: Decimal
     humedad: Decimal
