@@ -83,6 +83,58 @@ def list_registros_public(
 
     return {"respuesta": data}
 
+@router.get("/registros/ultimos/", response_model=ListaRespuesta[RegistroPromedioRead])
+def get_ultimos_registros_public(session: Session = Depends(get_session)):
+    key = "pub:registros:ultimos"
+    cached = cache.get(key)
+    if cached is not None:
+        return {"respuesta": cached}
+
+    subq = (
+        select(
+            Registro.fk_sensor,
+            func.max(Registro.fecha_hora).label("max_fecha"),
+        )
+        .group_by(Registro.fk_sensor)
+        .subquery()
+    )
+
+    rows = session.exec(
+        select(
+            Registro.fk_sensor,
+            Sensor.tipo.label("sensor_tipo"),
+            Estacion.id.label("estacion_id"),
+            Estacion.nombre.label("estacion_nombre"),
+            Registro.fecha_hora,
+            Registro.temperatura,
+            Registro.humedad,
+        )
+        .join(Sensor, Registro.fk_sensor == Sensor.id)
+        .join(Estacion, Sensor.fk_estacion == Estacion.id)
+        .join(
+            subq,
+            (Registro.fk_sensor == subq.c.fk_sensor)
+            & (Registro.fecha_hora == subq.c.max_fecha),
+        )
+    ).all()
+
+    data = [
+        {
+            "fk_sensor": r.fk_sensor,
+            "sensor_tipo": r.sensor_tipo,
+            "estacion_id": r.estacion_id,
+            "estacion_nombre": r.estacion_nombre,
+            "fecha_hora": r.fecha_hora,
+            "temperatura": r.temperatura,
+            "humedad": r.humedad,
+        }
+        for r in rows
+    ]
+    cache.set(key, data)
+
+    return {"respuesta": data}
+
+
 @router.get("/sensores/{sensor_id}/registros", response_model=ListaRespuesta[RegistroPromedioRead])
 def get_registros_sensor_public(
     sensor_id: str,
