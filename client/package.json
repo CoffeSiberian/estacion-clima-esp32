@@ -1,5 +1,7 @@
 {
 	"name": "estacion-clima-cliente",
+	"description": "Estación meteorológica con ESP32 y dashboard web",
+	"author": "Fernando Garrido",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
