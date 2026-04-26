@@ -27,11 +27,11 @@ def create_estacion(estacion: EstacionCreate, session: Session = Depends(get_ses
     session.refresh(db_estacion)
     return db_estacion
 
-@router.get("/estaciones/", response_model=ListaRespuesta[EstacionRead])
+@router.get("/estaciones/", response_model=ListaRespuesta[EstacionRead], dependencies=[Depends(validar_contrasena)])
 def list_estaciones(skip: int = 0, limit: int = 100, session: Session = Depends(get_session)):
     return {"respuesta": session.exec(select(Estacion).offset(skip).limit(limit)).all()}
 
-@router.get("/estaciones/{estacion_id}", response_model=EstacionRead)
+@router.get("/estaciones/{estacion_id}", response_model=EstacionRead, dependencies=[Depends(validar_contrasena)])
 def get_estacion(estacion_id: str, session: Session = Depends(get_session)):
     estacion = session.get(Estacion, estacion_id)
     if not estacion:
@@ -58,7 +58,7 @@ def create_sensor(sensor: SensorCreate, session: Session = Depends(get_session))
     session.refresh(db_sensor)
     return db_sensor
 
-@router.get("/sensores/", response_model=ListaRespuesta[SensorRead])
+@router.get("/sensores/", response_model=ListaRespuesta[SensorRead], dependencies=[Depends(validar_contrasena)])
 def list_sensores(estacion_id: Optional[str] = None, session: Session = Depends(get_session)):
     query = select(Sensor)
     if estacion_id:
@@ -66,7 +66,7 @@ def list_sensores(estacion_id: Optional[str] = None, session: Session = Depends(
     return {"respuesta": session.exec(query).all()}
 
 
-@router.get("/sensores/{sensor_id}", response_model=SensorRead)
+@router.get("/sensores/{sensor_id}", response_model=SensorRead, dependencies=[Depends(validar_contrasena)])
 def get_sensor(sensor_id: str, session: Session = Depends(get_session)):
     sensor = session.get(Sensor, sensor_id)
     if not sensor:
@@ -100,7 +100,7 @@ def create_registro(registro: RegistroPost, session: Session = Depends(get_sessi
     session.refresh(db_registro)
     return db_registro
 
-@router.get("/registros/", response_model=ListaRespuesta[RegistroRead])
+@router.get("/registros/", response_model=ListaRespuesta[RegistroRead], dependencies=[Depends(validar_contrasena)])
 def list_registros(
     sensor_id: Optional[str] = None,
     skip: int = 0,
@@ -112,14 +112,14 @@ def list_registros(
         query = query.where(Registro.fk_sensor == sensor_id)
     return {"respuesta": session.exec(query.offset(skip).limit(limit)).all()}
 
-@router.get("/registros/{registro_id}", response_model=RegistroRead)
+@router.get("/registros/{registro_id}", response_model=RegistroRead, dependencies=[Depends(validar_contrasena)])
 def get_registro(registro_id: str, session: Session = Depends(get_session)):
     registro = session.get(Registro, registro_id)
     if not registro:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Registro no encontrado")
     return registro
 
-@router.get("/sensores/{sensor_id}/registros", response_model=ListaRespuesta[RegistroRead])
+@router.get("/sensores/{sensor_id}/registros", response_model=ListaRespuesta[RegistroRead], dependencies=[Depends(validar_contrasena)])
 def get_registros_by_sensor(
     sensor_id: str,
     skip: int = 0,
