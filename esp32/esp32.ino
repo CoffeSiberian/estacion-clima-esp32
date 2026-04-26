@@ -8,8 +8,8 @@
 // ⚙️ CONFIGURACIÓN
 // ==========================================
 // Wi-Fi
-const char* ssid     = "Huevitos";
-const char* password = "zKp7INzCwrhBu5fKAeVP";
+const char* ssid     = "wifi";
+const char* password = "pass";
 
 // Servidor REST
 const char* serverUrl  = "http://192.168.1.1:8000/registros/";
