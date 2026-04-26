@@ -105,8 +105,7 @@ def list_registros(
     sensor_id: Optional[str] = None,
     skip: int = 0,
     limit: int = 100,
-    session: Session = Depends(get_session),
-    dependencies: str = Depends(validar_contrasena)
+    session: Session = Depends(get_session)
 ):
     query = select(Registro).order_by(Registro.fecha_hora.desc())
     if sensor_id:
