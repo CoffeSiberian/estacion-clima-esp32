@@ -1,0 +1,13 @@
+{
+    "name": "estacion-clima-esp32",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "uvicorn main:app --reload",
+        "web:up": "docker compose up -d --build",
+        "web:deploy": "docker compose up -d --build && docker image prune -f",
+        "web:rebuild": "docker compose build --no-cache --pull && docker compose up -d && docker image prune -f",
+        "web:down": "docker compose down",
+        "web:logs": "docker compose logs -f api"
+    }
+}

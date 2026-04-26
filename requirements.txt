@@ -3,3 +3,5 @@ pydantic==2.13.3
 python-dotenv==1.2.2
 python_bcrypt==0.3.2
 sqlmodel==0.0.38
+uvicorn[standard]
+mysql-connector-python

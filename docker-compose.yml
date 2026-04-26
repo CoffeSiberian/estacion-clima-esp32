@@ -1,0 +1,13 @@
+services:
+    api:
+        container_name: estacion-clima-api
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "2020:8000"
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        env_file:
+            - .env
