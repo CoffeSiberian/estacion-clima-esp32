@@ -12,7 +12,9 @@ export function App() {
 				<div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
 					<div className="flex items-center gap-2">
 						<IconCloud className="text-primary size-5" />
-						<span className="font-semibold tracking-tight">Estación Clima</span>
+						<span className="font-semibold tracking-tight">
+							Estación Clima Coffe
+						</span>
 					</div>
 					<div className="flex items-center gap-2">
 						<span className="text-muted-foreground hidden text-xs sm:block">
