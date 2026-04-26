@@ -1,10 +1,18 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 const OPTIONS = [
-	{ label: "1 día", value: 1 },
+	{ label: "Hoy (1 día)", value: 1 },
 	{ label: "3 días", value: 3 },
-	{ label: "7 días", value: 7 },
+	{ label: "1 semana", value: 7 },
+	{ label: "2 semanas", value: 14 },
+	{ label: "1 mes", value: 30 },
+	{ label: "3 meses", value: 90 },
 ];
 
 interface DaysFilterProps {
@@ -14,21 +22,17 @@ interface DaysFilterProps {
 
 export function DaysFilter({ value, onChange }: DaysFilterProps) {
 	return (
-		<div className="bg-muted flex gap-1 rounded-lg border p-1">
-			{OPTIONS.map((opt) => (
-				<Button
-					key={opt.value}
-					size="sm"
-					variant="ghost"
-					onClick={() => onChange(opt.value)}
-					className={cn(
-						"flex-1 text-xs font-medium transition-colors",
-						value === opt.value && "bg-background text-foreground shadow-sm"
-					)}
-				>
-					{opt.label}
-				</Button>
-			))}
-		</div>
+		<Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
+			<SelectTrigger className="w-40">
+				<SelectValue />
+			</SelectTrigger>
+			<SelectContent>
+				{OPTIONS.map((opt) => (
+					<SelectItem key={opt.value} value={String(opt.value)}>
+						{opt.label}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
 	);
 }

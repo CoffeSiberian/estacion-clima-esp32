@@ -33,7 +33,7 @@ def list_sensores_public(session: Session = Depends(get_session)):
 @router.get("/registros/", response_model=ListaRespuesta[RegistroPromedioRead])
 def list_registros_public(
     sensor_id: Optional[str] = None,
-    days: int = Query(default=7, ge=1, le=7),
+    days: int = Query(default=7, ge=1, le=365),
     session: Session = Depends(get_session),
 ):
     key = f"pub:registros:{sensor_id}:{days}"
@@ -138,7 +138,7 @@ def get_ultimos_registros_public(session: Session = Depends(get_session)):
 @router.get("/sensores/{sensor_id}/registros", response_model=ListaRespuesta[RegistroPromedioRead])
 def get_registros_sensor_public(
     sensor_id: str,
-    days: int = Query(default=7, ge=1, le=7),
+    days: int = Query(default=7, ge=1, le=365),
     session: Session = Depends(get_session),
 ):
     if not session.get(Sensor, sensor_id):
