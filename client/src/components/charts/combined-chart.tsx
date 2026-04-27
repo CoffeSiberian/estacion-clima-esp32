@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { RegistroPromedioRead } from "@/types/api";
-import { formatDate, formatTimeTick } from "@/lib/utils";
+import { formatDate, formatTimeTick, mergeByTimestamp } from "@/lib/utils";
 
 const chartConfig: ChartConfig = {
 	temperatura: {
@@ -28,27 +28,6 @@ const chartConfig: ChartConfig = {
 		color: "var(--chart-2)",
 	},
 };
-
-// Group by sensor and get latest reading for overview chart
-function buildOverviewData(data: RegistroPromedioRead[]) {
-	const byTime = new Map<
-		string,
-		{ fecha_hora: string; temperatura: number; humedad: number }
-	>();
-
-	for (const r of [...data].reverse()) {
-		const existing = byTime.get(r.fecha_hora);
-		if (!existing) {
-			byTime.set(r.fecha_hora, {
-				fecha_hora: r.fecha_hora,
-				temperatura: Number(Number(r.temperatura).toFixed(2)),
-				humedad: Number(Number(r.humedad).toFixed(2)),
-			});
-		}
-	}
-
-	return Array.from(byTime.values());
-}
 
 interface CombinedChartProps {
 	data: RegistroPromedioRead[];
@@ -63,7 +42,7 @@ export function CombinedChart({
 	title = "Temperatura y Humedad",
 	description,
 }: CombinedChartProps) {
-	const chartData = buildOverviewData(data);
+	const chartData = mergeByTimestamp(data);
 
 	return (
 		<Card>

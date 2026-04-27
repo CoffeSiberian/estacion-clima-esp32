@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { RegistroPromedioRead } from "@/types/api";
-import { formatDate, formatTimeTick } from "@/lib/utils";
+import { formatDate, formatTimeTick, mergeByTimestamp } from "@/lib/utils";
 
 const chartConfig: ChartConfig = {
 	humedad: {
@@ -36,10 +36,7 @@ export function HumedadChart({
 	title = "Humedad",
 	description,
 }: HumedadChartProps) {
-	const chartData = [...data].reverse().map((r) => ({
-		fecha_hora: r.fecha_hora,
-		humedad: Number(Number(r.humedad).toFixed(2)),
-	}));
+	const chartData = mergeByTimestamp(data);
 
 	return (
 		<Card>

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { RegistroPromedioRead } from "@/types/api";
-import { formatDate, formatTimeTick } from "@/lib/utils";
+import { formatDate, formatTimeTick, mergeByTimestamp } from "@/lib/utils";
 
 const chartConfig: ChartConfig = {
 	temperatura: {
@@ -44,10 +44,7 @@ export function TemperaturaChart({
 	title = "Temperatura",
 	description,
 }: TemperaturaChartProps) {
-	const chartData = [...data].reverse().map((r) => ({
-		fecha_hora: r.fecha_hora,
-		temperatura: Number(Number(r.temperatura).toFixed(2)),
-	}));
+	const chartData = mergeByTimestamp(data);
 
 	return (
 		<Card>

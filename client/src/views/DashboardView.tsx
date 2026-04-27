@@ -73,9 +73,13 @@ export function DashboardView() {
 					? Array.from({ length: 3 }).map((_, i) => (
 							<ReadingCardSkeleton key={i} />
 						))
-					: (ultimos ?? []).map((r) => (
-							<ReadingCard key={r.fk_sensor} registro={r} />
-						))}
+					: [...(ultimos ?? [])]
+							.sort(
+								(a, b) =>
+									a.estacion_nombre.localeCompare(b.estacion_nombre) ||
+									a.sensor_tipo.localeCompare(b.sensor_tipo)
+							)
+							.map((r) => <ReadingCard key={r.fk_sensor} registro={r} />)}
 			</div>
 
 			{/* Overview chart with filters */}
