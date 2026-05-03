@@ -17,6 +17,7 @@ export function DashboardView() {
 		data: ultimos,
 		loading: loadingUltimos,
 		error: errorUltimos,
+		lastUpdated,
 		refresh: refreshUltimos,
 	} = useUltimosRegistros();
 
@@ -45,18 +46,30 @@ export function DashboardView() {
 						Última lectura por sensor
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={refreshUltimos}
-					disabled={loadingUltimos}
-					className="gap-1.5"
-				>
-					<IconRefresh
-						className={`size-4 ${loadingUltimos ? "animate-spin" : ""}`}
-					/>
-					Actualizar
-				</Button>
+				<div className="flex flex-col items-end gap-1">
+					{lastUpdated && (
+						<span className="text-muted-foreground text-xs">
+							Actualizado a las{" "}
+							{lastUpdated.toLocaleTimeString("es-MX", {
+								hour: "2-digit",
+								minute: "2-digit",
+								second: "2-digit",
+							})}
+						</span>
+					)}
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={refreshUltimos}
+						disabled={loadingUltimos}
+						className="gap-1.5"
+					>
+						<IconRefresh
+							className={`size-4 ${loadingUltimos ? "animate-spin" : ""}`}
+						/>
+						Actualizar
+					</Button>
+				</div>
 			</div>
 
 			{/* Error state */}

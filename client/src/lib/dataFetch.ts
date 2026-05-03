@@ -3,7 +3,7 @@ const dataGet = async (
 	url: string
 ): Promise<Response | null> => {
 	try {
-		return await fetch(url, { ...options, method: "GET" });
+		return await fetch(url, { ...options, method: "GET", cache: "no-store" });
 	} catch {
 		return null;
 	}

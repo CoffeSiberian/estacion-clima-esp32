@@ -4,6 +4,7 @@ interface UseApiState<T> {
 	data: T | null;
 	loading: boolean;
 	error: boolean;
+	lastUpdated: Date | null;
 	refresh: () => void;
 }
 
@@ -15,6 +16,7 @@ export function useApi<T>(
 	const [data, setData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(false);
+	const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const fetchData = useCallback(async () => {
@@ -23,6 +25,7 @@ export function useApi<T>(
 		try {
 			const result = await fetcher();
 			setData(result);
+			setLastUpdated(new Date());
 		} catch {
 			setError(true);
 		} finally {
@@ -40,5 +43,5 @@ export function useApi<T>(
 		};
 	}, [fetchData, interval]);
 
-	return { data, loading, error, refresh: fetchData };
+	return { data, loading, error, lastUpdated, refresh: fetchData };
 }
