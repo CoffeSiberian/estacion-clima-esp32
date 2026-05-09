@@ -66,3 +66,15 @@ class RegistroPromedioRead(BaseModel):
     fecha_hora: datetime
     temperatura: Decimal
     humedad: Decimal
+
+
+class MinMaxRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    fk_sensor: str
+    sensor_tipo: str
+    estacion_id: str
+    estacion_nombre: str
+    temp_min: Decimal
+    temp_min_hora: datetime
+    temp_max: Decimal
+    temp_max_hora: datetime

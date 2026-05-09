@@ -3,6 +3,7 @@ import type {
 	ListaRespuesta,
 	SensorRead,
 	RegistroPromedioRead,
+	MinMaxRead,
 } from "@/types/api";
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
@@ -36,6 +37,12 @@ export async function getRegistros(
 export async function getUltimosRegistros(): Promise<RegistroPromedioRead[]> {
 	const res = await dataGet(undefined, `${BASE_URL}/public/registros/ultimos/`);
 	const data = await parseJson<ListaRespuesta<RegistroPromedioRead>>(res);
+	return data?.respuesta ?? [];
+}
+
+export async function getMinMaxRegistros(): Promise<MinMaxRead[]> {
+	const res = await dataGet(undefined, `${BASE_URL}/public/registros/minmax/`);
+	const data = await parseJson<ListaRespuesta<MinMaxRead>>(res);
 	return data?.respuesta ?? [];
 }
 

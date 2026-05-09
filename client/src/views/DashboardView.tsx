@@ -8,6 +8,8 @@ import { DaysFilter } from "@/components/days-filter";
 import { useUltimosRegistros } from "@/hooks/useUltimosRegistros";
 import { useRegistros } from "@/hooks/useRegistros";
 import { useSensores } from "@/hooks/useSensores";
+import { useMinMaxRegistros } from "@/hooks/useMinMaxRegistros";
+import type { MinMaxRead } from "@/types/api";
 
 export function DashboardView() {
 	const [chartSensorId, setChartSensorId] = useState<string>("all");
@@ -22,6 +24,10 @@ export function DashboardView() {
 	} = useUltimosRegistros();
 
 	const { data: sensores } = useSensores();
+	const { data: minMaxData } = useMinMaxRegistros();
+	const minMaxBySensor: Record<string, MinMaxRead> = Object.fromEntries(
+		(minMaxData ?? []).map((m) => [m.fk_sensor, m])
+	);
 
 	const activeSensorId = chartSensorId === "all" ? undefined : chartSensorId;
 
@@ -92,7 +98,13 @@ export function DashboardView() {
 									a.estacion_nombre.localeCompare(b.estacion_nombre) ||
 									a.sensor_tipo.localeCompare(b.sensor_tipo)
 							)
-							.map((r) => <ReadingCard key={r.fk_sensor} registro={r} />)}
+							.map((r) => (
+								<ReadingCard
+									key={r.fk_sensor}
+									registro={r}
+									minMax={minMaxBySensor[r.fk_sensor]}
+								/>
+							))}
 			</div>
 
 			{/* Overview chart with filters */}
