@@ -7,7 +7,12 @@ CREATE TABLE ESTACION (
 CREATE TABLE SENSOR (
     id CHAR(36) PRIMARY KEY,
     tipo VARCHAR(255) NOT NULL,
-  
+
+    -- Última lectura en vivo (sobrescrita en cada post desde el ESP32)
+    ultima_temperatura DECIMAL(10, 2) NULL,
+    ultima_humedad DECIMAL(10, 2) NULL,
+    ultima_fecha_hora DATETIME NULL,
+
     fk_estacion CHAR(36),
     FOREIGN KEY (fk_estacion) REFERENCES ESTACION(id)
 );
