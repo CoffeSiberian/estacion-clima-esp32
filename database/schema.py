@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Generic, TypeVar
+from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict
 
@@ -33,6 +33,9 @@ class SensorRead(BaseModel):
     id: str
     tipo: str
     fk_estacion: str
+    ultima_temperatura: Optional[Decimal] = None
+    ultima_humedad: Optional[Decimal] = None
+    ultima_fecha_hora: Optional[datetime] = None
 
 
 class RegistroCreate(BaseModel):
@@ -55,6 +58,15 @@ class RegistroPost(BaseModel):
     temperatura: Decimal
     humedad: Decimal
     fk_sensor: str
+
+
+class RegistroPostResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    fk_sensor: str
+    temperatura: Decimal
+    humedad: Decimal
+    fecha_hora: datetime
+    historico_guardado: bool
 
 
 class RegistroPromedioRead(BaseModel):

@@ -90,32 +90,20 @@ def get_ultimos_registros_public(session: Session = Depends(get_session)):
     if cached is not None:
         return {"respuesta": cached}
 
-    subq = (
+    # Live real: leer la última lectura desde SENSOR (actualizada cada ~10s),
+    # no el último histórico de REGISTRO (que solo se escribe cada 5 min).
+    rows = session.execute(
         select(
-            Registro.fk_sensor,
-            func.max(Registro.fecha_hora).label("max_fecha"),
-        )
-        .group_by(Registro.fk_sensor)
-        .subquery()
-    )
-
-    rows = session.exec(
-        select(
-            Registro.fk_sensor,
+            Sensor.id.label("fk_sensor"),
             Sensor.tipo.label("sensor_tipo"),
             Estacion.id.label("estacion_id"),
             Estacion.nombre.label("estacion_nombre"),
-            Registro.fecha_hora,
-            Registro.temperatura,
-            Registro.humedad,
+            Sensor.ultima_fecha_hora.label("fecha_hora"),
+            Sensor.ultima_temperatura.label("temperatura"),
+            Sensor.ultima_humedad.label("humedad"),
         )
-        .join(Sensor, Registro.fk_sensor == Sensor.id)
         .join(Estacion, Sensor.fk_estacion == Estacion.id)
-        .join(
-            subq,
-            (Registro.fk_sensor == subq.c.fk_sensor)
-            & (Registro.fecha_hora == subq.c.max_fecha),
-        )
+        .where(Sensor.ultima_fecha_hora.is_not(None))  # omitir sensores sin lectura aún
     ).all()
 
     data = [

@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 from sqlalchemy import Index
 from sqlmodel import Field, SQLModel
@@ -18,6 +19,10 @@ class Sensor(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     tipo: str
     fk_estacion: str = Field(foreign_key="ESTACION.id")
+    # Última lectura en vivo (sobrescrita en cada post; fuente para datos EN VIVO)
+    ultima_temperatura: Optional[Decimal] = Field(default=None, max_digits=10, decimal_places=2)
+    ultima_humedad: Optional[Decimal] = Field(default=None, max_digits=10, decimal_places=2)
+    ultima_fecha_hora: Optional[datetime] = Field(default=None)
 
 
 class Registro(SQLModel, table=True):

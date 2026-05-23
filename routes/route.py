@@ -1,17 +1,19 @@
 from typing import Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from utils.auth import validar_contrasena
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlmodel import Session, select
 
+from config import INTERVALO_HISTORICO_MINUTOS
 from database.database import get_session
 from database.model import Estacion, Sensor, Registro
 from database.schema import (
     EstacionCreate, EstacionRead,
     SensorCreate, SensorRead,
-    RegistroRead, RegistroPost,
+    RegistroRead, RegistroPost, RegistroPostResponse,
     ListaRespuesta
 )
 
@@ -83,22 +85,47 @@ def delete_sensor(sensor_id: str, session: Session = Depends(get_session)):
 
 # REGISTRO
 
-@router.post("/registros/", response_model=RegistroRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(validar_contrasena)])
+@router.post("/registros/", response_model=RegistroPostResponse, dependencies=[Depends(validar_contrasena)])
 def create_registro(registro: RegistroPost, session: Session = Depends(get_session)):
-    if not session.get(Sensor, registro.fk_sensor):
+    sensor = session.get(Sensor, registro.fk_sensor)
+    if not sensor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor no encontrado")
 
     hora_utc = datetime.now(timezone.utc)
-    db_registro = Registro(
+
+    # Siempre actualizar la lectura en vivo del sensor (cada ~10s)
+    sensor.ultima_temperatura = registro.temperatura
+    sensor.ultima_humedad = registro.humedad
+    sensor.ultima_fecha_hora = hora_utc
+    session.add(sensor)
+
+    # Persistir al histórico solo si pasó el intervalo desde el último registro
+    ultimo_hist = session.exec(
+        select(func.max(Registro.fecha_hora)).where(Registro.fk_sensor == registro.fk_sensor)
+    ).one()
+    # MySQL DATETIME vuelve naive; normalizar a UTC para restar contra hora_utc (aware)
+    if ultimo_hist is not None and ultimo_hist.tzinfo is None:
+        ultimo_hist = ultimo_hist.replace(tzinfo=timezone.utc)
+
+    historico_guardado = False
+    if ultimo_hist is None or (hora_utc - ultimo_hist) >= timedelta(minutes=INTERVALO_HISTORICO_MINUTOS):
+        session.add(Registro(
+            temperatura=registro.temperatura,
+            humedad=registro.humedad,
+            fecha_hora=hora_utc,
+            fk_sensor=registro.fk_sensor,
+        ))
+        historico_guardado = True
+
+    session.commit()
+
+    return RegistroPostResponse(
+        fk_sensor=registro.fk_sensor,
         temperatura=registro.temperatura,
         humedad=registro.humedad,
         fecha_hora=hora_utc,
-        fk_sensor=registro.fk_sensor
+        historico_guardado=historico_guardado,
     )
-    session.add(db_registro)
-    session.commit()
-    session.refresh(db_registro)
-    return db_registro
 
 @router.get("/registros/", response_model=ListaRespuesta[RegistroRead], dependencies=[Depends(validar_contrasena)])
 def list_registros(
