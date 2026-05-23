@@ -21,3 +21,6 @@ CREATE TABLE REGISTRO (
     fk_sensor CHAR(36),
     FOREIGN KEY (fk_sensor) REFERENCES SENSOR(id)
 );
+
+CREATE INDEX idx_registro_sensor_fecha ON REGISTRO (fk_sensor, fecha_hora);
+CREATE INDEX idx_registro_fecha ON REGISTRO (fecha_hora);
